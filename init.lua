@@ -1,8 +1,7 @@
--- Set <space> as the leader key
--- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = 'ñ'
-vim.g.maplocalleader = 'l'
+vim.g.maplocalleader = '*'
+
 -- Set to true if you have a Nerd Font installed
 vim.g.have_nerd_font = true
 
@@ -13,9 +12,6 @@ vim.g.have_nerd_font = true
 
 -- Make line numbers default
 vim.opt.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -24,8 +20,6 @@ vim.opt.mouse = 'a'
 vim.opt.showmode = false
 
 -- Sync clipboard between OS and Neovim.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
 vim.opt.clipboard = 'unnamedplus'
 
 -- Enable break indent
@@ -65,7 +59,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+vim.opt.scrolloff = 12
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -88,20 +82,25 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- TIP: Disable arrow keys in normal mode
---vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
---vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
---vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
---vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
-
+-- Custom keymaps
 -- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
 vim.keymap.set('n', '<C-left>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-right>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-down>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-up>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- Keybinds for basic commands
+vim.keymap.set('n', '<S-up>', 'ddkP', { desc = 'Line up', silent = true, noremap = true })
+vim.keymap.set('n', '<S-down>', 'ddp', { desc = 'Line down', silent = true, noremap = true })
+
+-- Keybinds for plugins
+vim.keymap.set('n', '<C-b>', ':Neotree toggle<CR>', { desc = 'Toogle neotree SideBar', silent = true, noremap = true })
+
+-- Keybinds for disable default movement
+vim.keymap.set('n', 'h', '')
+vim.keymap.set('n', 'j', '')
+vim.keymap.set('n', 'k', '')
+vim.keymap.set('n', 'l', '')
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -209,7 +208,6 @@ require('lazy').setup({
   -- you do for a plugin at the top level, you can do for a dependency.
   --
   -- Use the `dependencies` key to specify the dependencies of a particular plugin
-
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
@@ -262,10 +260,19 @@ require('lazy').setup({
         --
         defaults = {
           file_ignore_patterns = {
-            'node_modules',
-            'obj',
-            '.vs',
-            'bin',
+            '**/obj',
+            '**/.vs',
+            '**/bin',
+            '**/.git',
+            '**/.svn',
+            '**/.hg',
+            '**/CVS',
+            '**/.DS_Store',
+            '**/Thumbs.db',
+            '**/dist',
+            '**/node_modules',
+            '**/.angular',
+            '**/.gitkeep',
           },
           --   mappings = {
           --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
@@ -320,7 +327,8 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
-  { -- LSP Configuration & Plugins
+  {
+    --LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
@@ -456,7 +464,7 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-
+      local utils = require 'lspconfig.util'
       local servers = {
         -- clangd = {},
         -- gopls = {},
@@ -470,7 +478,26 @@ require('lazy').setup({
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
         --
-        omnisharp = {},
+        angularls = {},
+        ast_grep = {
+          cmd = { 'ast-grep', 'lsp' },
+          filetypes = {
+            'javascript',
+            'typescript',
+          },
+          root_dir = utils.root_pattern 'sgconfig.yml',
+        },
+        html = {
+          capabilities = capabilities,
+        },
+        omnisharp = {
+          capabilities = capabilities,
+          enable_roslyn_analysers = true,
+          enable_import_completion = true,
+          organize_imports_on_format = true,
+          enable_decompilation_support = true,
+          filetypes = { 'cs', 'vb' },
+        },
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -480,8 +507,6 @@ require('lazy').setup({
               completion = {
                 callSnippet = 'Replace',
               },
-              -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              -- diagnostics = { disable = { 'missing-fields' } },
             },
           },
         },
@@ -517,7 +542,69 @@ require('lazy').setup({
       }
     end,
   },
-
+  {
+    'nvim-neo-tree/neo-tree.nvim',
+    version = '*',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
+      'MunifTanjim/nui.nvim',
+    },
+    config = function()
+      require('neo-tree').setup {
+        close_if_last_window = true,
+        enable_git_status = true,
+        enable_diagnostics = true,
+        window = {
+          width = 30,
+          position = 'float',
+        },
+        filesystem = {
+          filtered_items = {
+            hide_dotfiles = true,
+            hide_by_pattern = {
+              '**/obj',
+              '**/.vs',
+              '**/bin',
+              '**/.git',
+              '**/.svn',
+              '**/.hg',
+              '**/CVS',
+              '**/.DS_Store',
+              '**/Thumbs.db',
+              '**/dist',
+              '**/node_modules',
+              '**/.angular',
+              '**/.gitkeep',
+            },
+            always_show = {
+              '.gitignore',
+            },
+          },
+        },
+        default_component_configs = {
+          name = {
+            use_git_status_colors = true,
+          },
+          git_status = {
+            symbols = {
+              -- Change type
+              added = '✚',
+              modified = '',
+              deleted = '',
+              renamed = '4',
+              -- Status type
+              untracked = '5',
+              ignored = '6',
+              unstaged = '7',
+              staged = '8',
+              conflict = '9',
+            },
+          },
+        },
+      }
+    end,
+  },
   { -- Autoformat
     'stevearc/conform.nvim',
     lazy = false,
@@ -704,7 +791,9 @@ require('lazy').setup({
       --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
+      statusline.setup {
+        use_icons = vim.g.have_nerd_font,
+      }
 
       -- You can configure sections in the statusline by overriding their
       -- default behavior. For example, here we set the section for
@@ -773,7 +862,7 @@ require('lazy').setup({
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
     icons = vim.g.have_nerd_font and {} or {
-      cmd = '⌘',
+      cmd = '🎲',
       config = '🛠',
       event = '📅',
       ft = '📂',
