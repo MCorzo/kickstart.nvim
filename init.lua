@@ -456,36 +456,22 @@ require('lazy').setup({
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
       -- Enable the following language servers
-      --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
-      --
-      --  Add any additional override configuration in the following tables. Available keys are:
-      --  - cmd (table): Override the default command used to start the server
-      --  - filetypes (table): Override the default list of associated filetypes for the server
-      --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
-      --  - settings (table): Override the default settings passed when initializing the server.
+      --  cmd (table): Override the default command used to start the server
+      --  filetypes (table): Override the default list of associated filetypes for the server
+      --  capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
+      --  settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-      local utils = require 'lspconfig.util'
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
-        --
         angularls = {},
         ast_grep = {
           cmd = { 'ast-grep', 'lsp' },
           filetypes = {
             'javascript',
             'typescript',
+            'typescriptreact',
+            'javascriptreact',
           },
-          root_dir = utils.root_pattern 'sgconfig.yml',
+          --root_dir = utils.root_pattern 'sgconfig.yml',
         },
         html = {
           capabilities = capabilities,
@@ -499,9 +485,6 @@ require('lazy').setup({
           filetypes = { 'cs', 'vb' },
         },
         lua_ls = {
-          -- cmd = {...},
-          -- filetypes = { ...},
-          -- capabilities = {},
           settings = {
             Lua = {
               completion = {
@@ -589,16 +572,16 @@ require('lazy').setup({
           git_status = {
             symbols = {
               -- Change type
-              added = '✚',
-              modified = '',
-              deleted = '',
-              renamed = '4',
+              added = '',
+              modified = '',
+              deleted = '',
+              renamed = '',
               -- Status type
-              untracked = '5',
-              ignored = '6',
-              unstaged = '7',
-              staged = '8',
-              conflict = '9',
+              untracked = '',
+              ignored = '',
+              unstaged = '',
+              staged = '',
+              conflict = '',
             },
           },
         },
@@ -632,12 +615,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use a sub-list to tell conform to run *until* a formatter
-        -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        javascript = { 'prettier' },
       },
     },
   },
@@ -691,7 +669,6 @@ require('lazy').setup({
           end,
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
-
         -- For an understanding of why these mappings were
         -- chosen, you will need to read `:help ins-completion`
         --
@@ -701,7 +678,6 @@ require('lazy').setup({
           ['<C-n>'] = cmp.mapping.select_next_item(),
           -- Select the [p]revious item
           ['<C-p>'] = cmp.mapping.select_prev_item(),
-
           -- Scroll the documentation window [b]ack / [f]orward
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -859,8 +835,6 @@ require('lazy').setup({
   -- { import = 'custom.plugins' },
 }, {
   ui = {
-    -- If you are using a Nerd Font: set icons to an empty table which will use the
-    -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
     icons = vim.g.have_nerd_font and {} or {
       cmd = '🎲',
       config = '🛠',
