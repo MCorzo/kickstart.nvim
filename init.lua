@@ -1,6 +1,6 @@
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = 'ñ'
-vim.g.maplocalleader = '*'
+vim.g.maplocalleader = '<C-ñ>'
 
 -- Set to true if you have a Nerd Font installed
 vim.g.have_nerd_font = true
@@ -333,6 +333,7 @@ require('lazy').setup({
       'williamboman/mason.nvim',
       'williamboman/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
+      --{ 'csharpls-extended-lsp.nvim', url = 'https://github.com/Decodetalkers/csharpls-extended-lsp.nvim' },
       { 'omnisharp_extended.nvim', url = 'https://github.com/Hoffs/omnisharp-extended-lsp.nvim' },
 
       -- Useful status updates for LSP.
@@ -461,27 +462,17 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         angularls = {},
-        ast_grep = {
-          cmd = { 'ast-grep', 'lsp' },
-          filetypes = {
-            'javascript',
-            'typescript',
-            'typescriptreact',
-            'javascriptreact',
-          },
-          --root_dir = utils.root_pattern 'sgconfig.yml',
-        },
         html = {
           capabilities = capabilities,
         },
-        omnisharp = {
-          capabilities = capabilities,
-          enable_roslyn_analysers = true,
-          enable_import_completion = true,
-          organize_imports_on_format = true,
-          enable_decompilation_support = true,
-          filetypes = { 'cs', 'vb' },
-        },
+        --        omnisharp = {
+        --          capabilities = capabilities,
+        --          enable_roslyn_analysers = true,
+        --          enable_import_completion = true,
+        --          organize_imports_on_format = true,
+        --          enable_decompilation_support = true,
+        --          filetypes = { 'cs', 'vb' },
+        --        },
         lua_ls = {
           settings = {
             Lua = {
