@@ -6,7 +6,6 @@ vim.g.maplocalleader = '<C-ñ>'
 vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
--- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
@@ -47,8 +46,6 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 
 -- Sets how neovim will display certain whitespace characters in the editor.
---  See `:help 'list'`
---  and `:help 'listchars'`
 vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
@@ -62,15 +59,13 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 12
 
 -- [[ Basic Keymaps ]]
---  See `:help vim.keymap.set()`
-
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
+vim.keymap.set('n', '<C-S-left>', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
+vim.keymap.set('n', '<C-S-right>', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
@@ -90,8 +85,8 @@ vim.keymap.set('n', '<C-down>', '<C-w><C-j>', { desc = 'Move focus to the lower 
 vim.keymap.set('n', '<C-up>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- Keybinds for basic commands
-vim.keymap.set('n', '<S-up>', 'ddkP', { desc = 'Line up', silent = true, noremap = true })
-vim.keymap.set('n', '<S-down>', 'ddp', { desc = 'Line down', silent = true, noremap = true })
+vim.keymap.set('n', '<S-up>', 'ddkP', { desc = 'Move line up', silent = true, noremap = true })
+vim.keymap.set('n', '<S-down>', 'ddp', { desc = 'Move line down', silent = true, noremap = true })
 
 -- Keybinds for plugins
 vim.keymap.set('n', '<C-b>', ':Neotree toggle<CR>', { desc = 'Toogle neotree SideBar', silent = true, noremap = true })
@@ -126,16 +121,6 @@ end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
 -- [[ Configure and install plugins ]]
---
---  To check the current status of your plugins, run
---    :Lazy
---
---  You can press `?` in this menu for help. Use `:q` to close the window
---
---  To update plugins you can run
---    :Lazy update
---
--- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
@@ -333,8 +318,6 @@ require('lazy').setup({
       'williamboman/mason.nvim',
       'williamboman/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
-      --{ 'csharpls-extended-lsp.nvim', url = 'https://github.com/Decodetalkers/csharpls-extended-lsp.nvim' },
-      { 'omnisharp_extended.nvim', url = 'https://github.com/Hoffs/omnisharp-extended-lsp.nvim' },
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -343,6 +326,9 @@ require('lazy').setup({
       -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
       -- used for completion, annotations and signatures of Neovim apis
       { 'folke/neodev.nvim', opts = {} },
+
+      --{ 'csharpls-extended-lsp.nvim', url = 'https://github.com/Decodetalkers/csharpls-extended-lsp.nvim' },
+      { 'omnisharp_extended.nvim', url = 'https://github.com/Hoffs/omnisharp-extended-lsp.nvim' },
     },
     config = function()
       -- Brief aside: **What is LSP?**
@@ -377,6 +363,8 @@ require('lazy').setup({
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
+          local client = vim.lsp.get_client_by_id(event.data.client_id)
+
           -- NOTE: Remember that Lua is a real programming language, and as such it is possible
           -- to define small helper and utility functions so you don't have to repeat yourself.
           --
@@ -427,12 +415,29 @@ require('lazy').setup({
           --  For example, in C this would take you to the header.
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
+          if client.name == 'omnisharp' then
+            map('gr', function()
+              require('omnisharp_extended').telescope_lsp_references()
+            end, 'Goto [R]eferences')
+
+            map('gd', function()
+              require('omnisharp_extended').telescope_lsp_definition()
+            end, 'Goto [D]efinition')
+
+            map('gD', function()
+              require('omnisharp_extended').telescope_lsp_type_definition()
+            end, 'Goto [D]eclaration')
+
+            map('gI', function()
+              require('omnisharp_extended').telescope_lsp_implementation()
+            end, 'Goto [I]mplementation')
+          end
+
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
           --    See `:help CursorHold` for information about when this is executed
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
-          local client = vim.lsp.get_client_by_id(event.data.client_id)
           if client and client.server_capabilities.documentHighlightProvider then
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
@@ -460,19 +465,40 @@ require('lazy').setup({
       --  capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+      local currentPID = vim.fn.getpid()
+
       local servers = {
         angularls = {},
-        html = {
+        tsserver = {},
+        html = {},
+        omnisharp = {
           capabilities = capabilities,
+          filetypes = { 'cs', 'vb', 'sln', 'csproj' },
+          root_dir = function(fname)
+            local primary = require('lspconfig').util.root_pattern '*.sln'(fname)
+            local fallback = require('lspconfig').util.root_pattern '*.csproj'(fname)
+
+            return primary or fallback
+          end,
+          settings = {
+            FormattingOptions = {
+              EnableEditorConfigSupport = true,
+              OrganizeImports = true,
+            },
+            MsBuild = {
+              LoadProjectsOnDemand = false,
+            },
+            RoslynExtensionsOptions = {
+              EnableAnalyzersSupport = true,
+              EnableImportCompletion = true,
+              AnalyzeOpenDocumentsOnly = true,
+              EnableDecompilationSupport = true,
+            },
+            Sdk = {
+              IncludePrereleases = true,
+            },
+          },
         },
-        --        omnisharp = {
-        --          capabilities = capabilities,
-        --          enable_roslyn_analysers = true,
-        --          enable_import_completion = true,
-        --          organize_imports_on_format = true,
-        --          enable_decompilation_support = true,
-        --          filetypes = { 'cs', 'vb' },
-        --        },
         lua_ls = {
           settings = {
             Lua = {
@@ -484,12 +510,6 @@ require('lazy').setup({
         },
       }
 
-      -- Ensure the servers and tools above are installed
-      --  To check the current status of installed tools and/or manually install
-      --  other tools, you can run
-      --    :Mason
-      --
-      --  You can press `g?` for help in this menu.
       require('mason').setup()
 
       -- You can add other tools here that you want Mason to install
@@ -664,12 +684,12 @@ require('lazy').setup({
         -- No, but seriously. Please read `:help ins-completion`, it is really good!
         mapping = cmp.mapping.preset.insert {
           -- Select the [n]ext item
-          ['<C-n>'] = cmp.mapping.select_next_item(),
+          --['<C-down>'] = cmp.mapping.select_next_item(),
           -- Select the [p]revious item
-          ['<C-p>'] = cmp.mapping.select_prev_item(),
+          --['<C-up>'] = cmp.mapping.select_prev_item(),
           -- Scroll the documentation window [b]ack / [f]orward
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          ['<C-down>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-up>'] = cmp.mapping.scroll_docs(4),
 
           -- Accept ([y]es) the completion.
           --  This will auto-import if your LSP supports it.
@@ -841,6 +861,8 @@ require('lazy').setup({
     },
   },
 })
+
+vim.lsp.set_log_level 'debug'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
