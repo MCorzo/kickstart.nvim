@@ -39,7 +39,7 @@ vim.opt.updatetime = 250
 
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
-vim.opt.timeoutlen = 300
+vim.opt.timeoutlen = 800
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -183,6 +183,7 @@ require('lazy').setup({
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
         ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+        ['<leader>t'] = { name = '[T]elescope', _ = 'which_key_ignore' },
       }
     end,
   },
@@ -240,7 +241,6 @@ require('lazy').setup({
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
       require('telescope').setup {
-        -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         defaults = {
           file_ignore_patterns = {
@@ -258,9 +258,12 @@ require('lazy').setup({
             '**/.angular',
             '**/.gitkeep',
           },
-          --   mappings = {
-          --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-          --   },
+          mappings = {
+            n = {
+              --['<C-Up>'] = 'preview_scrolling_up',
+              --['<C-Down>'] = 'preview_scrolling_down',
+            },
+          },
         },
         extensions = {
           ['ui-select'] = {
@@ -415,22 +418,12 @@ require('lazy').setup({
           --  For example, in C this would take you to the header.
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
+          -- Custom mapping for omniSharp lsp
           if client.name == 'omnisharp' then
-            map('gr', function()
-              require('omnisharp_extended').telescope_lsp_references()
-            end, 'Goto [R]eferences')
-
-            map('gd', function()
-              require('omnisharp_extended').telescope_lsp_definition()
-            end, 'Goto [D]efinition')
-
-            map('gD', function()
-              require('omnisharp_extended').telescope_lsp_type_definition()
-            end, 'Goto [D]eclaration')
-
-            map('gI', function()
-              require('omnisharp_extended').telescope_lsp_implementation()
-            end, 'Goto [I]mplementation')
+            map('gr', require('omnisharp_extended').telescope_lsp_references, 'Goto [R]eferences')
+            map('gd', require('omnisharp_extended').telescope_lsp_definition, 'Goto [D]efinition')
+            map('gD', require('omnisharp_extended').telescope_lsp_type_definition, 'Goto [D]eclaration')
+            map('gI', require('omnisharp_extended').telescope_lsp_implementation, 'Goto [I]mplementation')
           end
 
           -- The following two autocommands are used to highlight references of the
@@ -449,6 +442,11 @@ require('lazy').setup({
               callback = vim.lsp.buf.clear_references,
             })
           end
+
+          -- Custom mapping for telescope pickers
+          vim.keymap.set('n', '<leader>tt', require('telescope.builtin').treesitter, { desc = '[S]how [T]reeSitter' })
+          vim.keymap.set('n', '<leader>tg', require('telescope.builtin').git_commits, { desc = '[S]how [G]it commits' })
+          vim.keymap.set('n', '<leader>tb', require('telescope.builtin').git_branches, { desc = '[S]how Git [B]ranches' })
         end,
       })
 
@@ -465,7 +463,6 @@ require('lazy').setup({
       --  capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-      local currentPID = vim.fn.getpid()
 
       local servers = {
         angularls = {},
@@ -658,7 +655,6 @@ require('lazy').setup({
         },
       },
       'saadparwaiz1/cmp_luasnip',
-
       -- Adds other completion capabilities.
       --  nvim-cmp does not ship with all sources by default. They are split
       --  into multiple repos for maintenance purposes.
@@ -666,7 +662,6 @@ require('lazy').setup({
       'hrsh7th/cmp-path',
     },
     config = function()
-      -- See `:help cmp`
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
       luasnip.config.setup {}
@@ -690,15 +685,7 @@ require('lazy').setup({
           -- Scroll the documentation window [b]ack / [f]orward
           ['<C-down>'] = cmp.mapping.scroll_docs(-4),
           ['<C-up>'] = cmp.mapping.scroll_docs(4),
-
-          -- Accept ([y]es) the completion.
-          --  This will auto-import if your LSP supports it.
-          --  This will expand snippets if the LSP sent a snippet.
           ['<Tab>'] = cmp.mapping.confirm { select = true },
-
-          -- Manually trigger a completion from nvim-cmp.
-          --  Generally you don't need this, because nvim-cmp will display
-          --  completions whenever it has completion options available.
           ['<C-Space>'] = cmp.mapping.complete {},
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
@@ -731,28 +718,17 @@ require('lazy').setup({
       }
     end,
   },
-
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  {
     'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
+    priority = 1000,
     init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
-
-      -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
     end,
   },
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
-
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -822,6 +798,22 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
+  {
+    'kdheepak/lazygit.nvim',
+    cmd = {
+      'LazyGit',
+      'LazyGitConfig',
+      'LazyGitCurrentFile',
+      'LazyGitFilter',
+      'LazyGitFilterCurrentFile',
+    },
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    keys = {
+      { '<leader>lg', '<cmd>LazyGit<cr>1', desc = 'Open LazyGit' },
+    },
+  },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -862,7 +854,7 @@ require('lazy').setup({
   },
 })
 
-vim.lsp.set_log_level 'debug'
+--vim.lsp.set_log_level 'debug'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
