@@ -1,4 +1,3 @@
---  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = 'ñ'
 vim.g.maplocalleader = '<C-ñ>'
 
@@ -58,6 +57,10 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 12
 
+-- Deactivate default net_rw
+--vim.g.loaded_netrw = 1
+--vim.g.loaded_netrwPlugin = 1
+
 -- [[ Basic Keymaps ]]
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
@@ -89,25 +92,19 @@ vim.keymap.set('n', '<C-right>', '<C-w><C-l>', { desc = 'Move focus to the right
 vim.keymap.set('n', '<C-down>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-up>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- Keybinds for basic commands
-vim.keymap.set('n', '<S-up>', 'ddkP', { desc = 'Move line up', silent = true, noremap = true })
-vim.keymap.set('n', '<S-down>', 'ddp', { desc = 'Move line down', silent = true, noremap = true })
-
--- Keybinds for plugins
-vim.keymap.set('n', '<C-b>', ':Neotree toggle<CR>', { desc = 'Toogle neotree SideBar', silent = true, noremap = true })
-
 -- Keybinds for disable default movement, its zero intuitive btw
-vim.keymap.set('n', 'h', '')
 vim.keymap.set('n', 'j', '')
+vim.keymap.set('n', 'h', '')
 vim.keymap.set('n', 'k', '')
 vim.keymap.set('n', 'l', '')
 
--- [[ Basic Autocommands ]]
---  See `:help lua-guide-autocommands`
+-- Keybinds for basic commands
+vim.keymap.set('n', '<S-up>', 'ddkP', { desc = 'Move line up', silent = true, noremap = true })
+vim.keymap.set('n', '<S-down>', 'ddp', { desc = 'Move line down', silent = true, noremap = true })
+vim.keymap.set('n', '<A-left>', '<cmd>b#<CR>', { desc = 'Previous buffer', noremap = true, silent = false })
+vim.keymap.set('n', '<A-right>', '<cmd>bnext<CR>', { desc = 'Next buffer', noremap = true, silent = false })
 
--- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.highlight.on_yank()`
+-- Keybinds for plugins
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
@@ -129,7 +126,7 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
 
-  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  { 'tpope/vim-sleuth' }, -- Detect tabstop and shiftwidth automatically
 
   { 'numToStr/Comment.nvim', opts = {} },
 
@@ -151,13 +148,13 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
+  --require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
-  { import = 'custom.plugins' },
+  { import = 'plugins' },
 }, {
   ui = {
     icons = {
