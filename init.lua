@@ -55,10 +55,10 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 12
+vim.opt.scrolloff = 10
 
 -- Deactivate default net_rw
---vim.g.loaded_netrw = 1
+vim.g.loaded_netrw = 1
 --vim.g.loaded_netrwPlugin = 1
 
 -- [[ Basic Keymaps ]]
@@ -72,10 +72,10 @@ vim.keymap.set('v', '<C-l>', 'gu', { desc = 'To Lower Case' })
 vim.keymap.set('v', '<C-t>', '~', { desc = 'Toogle Case' })
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '<C-S-left>', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
-vim.keymap.set('n', '<C-S-right>', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+--vim.keymap.set('n', '<C-S-left>', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
+--vim.keymap.set('n', '<C-S-right>', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
+--vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+--vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -99,10 +99,13 @@ vim.keymap.set('n', 'k', '')
 vim.keymap.set('n', 'l', '')
 
 -- Keybinds for basic commands
-vim.keymap.set('n', '<S-up>', 'ddkP', { desc = 'Move line up', silent = true, noremap = true })
-vim.keymap.set('n', '<S-down>', 'ddp', { desc = 'Move line down', silent = true, noremap = true })
-vim.keymap.set('n', '<A-left>', '<cmd>b#<CR>', { desc = 'Previous buffer', noremap = true, silent = false })
-vim.keymap.set('n', '<A-right>', '<cmd>bnext<CR>', { desc = 'Next buffer', noremap = true, silent = false })
+vim.keymap.set('n', '<C-S-left>', '<cmd>bn<CR>', { desc = 'Previous buffer', noremap = true, silent = false })
+vim.keymap.set('n', '<C-S-right>', '<cmd>bp<CR>', { desc = 'Next buffer', noremap = true, silent = false })
+vim.keymap.set('n', '<C-A-left', '<cmd>cnext<CR>', { desc = 'Next quickfix', noremap = true, silent = false })
+vim.keymap.set('n', '<C-A-right', '<cmd>cprev<CR>', { desc = 'Previous quickfix', noremap = true, silent = false })
+
+vim.keymap.set('n', '<A-up>', 'ddkP', { desc = 'Move line up', silent = true, noremap = true })
+vim.keymap.set('n', '<A-down>', 'ddp', { desc = 'Move line down', silent = true, noremap = true })
 
 -- Keybinds for plugins
 vim.api.nvim_create_autocmd('TextYankPost', {

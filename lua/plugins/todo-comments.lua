@@ -10,7 +10,7 @@ return {
       desc = 'Project Comments List',
     },
     {
-      '<leader>st',
+      '<leader>so',
       function()
         Snacks.picker.todo_comments { keywords = { 'TODO', 'FIX', 'FIXME' } }
       end,
