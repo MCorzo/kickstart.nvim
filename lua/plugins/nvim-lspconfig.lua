@@ -3,7 +3,7 @@ return {
   'neovim/nvim-lspconfig',
   dependencies = {
     -- Automatically install LSPs and related tools to stdpath for Neovim
-    'williamboman/mason.nvim',
+    { 'williamboman/mason.nvim', cmd = { 'Mason', 'MasonInstall', 'MasonUnInstall', 'MasonUninstallAll', 'MasonLog', 'MasonUpdate' } },
     'williamboman/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     -- Useful status updates for LSP.
@@ -13,7 +13,7 @@ return {
     -- used for completion, annotations and signatures of Neovim apis
     { 'folke/neodev.nvim', opts = {} },
     --{ 'Hoffs/omnisharp-extended-lsp.nvim' },
-    { 'rachartier/tiny-inline-diagnostic.nvim' },
+    { 'rachartier/tiny-inline-diagnostic.nvim', opts = {} },
   },
   config = function()
     vim.api.nvim_create_autocmd('LspAttach', {
