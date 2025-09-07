@@ -114,7 +114,7 @@ return {
       '<leader>st',
       function()
         local os_name = package.config:sub(1, 1) == '\\' and 'win' or 'unix'
-        Snacks.terminal(os_name == 'win' and 'pwsh.exe' or 'bash')
+        Snacks.terminal(os_name == 'win' and 'pwsh.exe' or 'bash', { win = { border = 'rounded' } })
       end,
       desc = 'Open float [t]erminal',
     },
