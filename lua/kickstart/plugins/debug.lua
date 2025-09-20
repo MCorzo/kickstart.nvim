@@ -5,7 +5,6 @@
 -- Primarily focused on configuring the debugger for Go, but can
 -- be extended to other languages as well. That's why it's called
 -- kickstart.nvim and not kitchen-sink.nvim ;)
-
 return {
   -- NOTE: Yes, you can install new plugins here!
   'mfussenegger/nvim-dap',
@@ -22,7 +21,7 @@ return {
     'jay-babu/mason-nvim-dap.nvim',
 
     -- Add your own debuggers here
-    'leoluz/nvim-dap-go',
+    --'leoluz/nvim-dap-go',
   },
   config = function()
     local dap = require 'dap'
@@ -41,19 +40,21 @@ return {
       -- online, please don't ask me how to install them :)
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
-        'delve',
+        'coreclr',
       },
     }
 
     -- Basic debugging keymaps, feel free to change to your liking!
     vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
-    vim.keymap.set('n', '<F11>', dap.step_into, { desc = 'Debug: Step Into' })
-    vim.keymap.set('n', '<F10>', dap.step_over, { desc = 'Debug: Step Over' })
-    vim.keymap.set('n', '<F12>', dap.step_out, { desc = 'Debug: Step Out' })
-    vim.keymap.set('n', '<F09>', dap.toggle_breakpoint, { desc = 'Debug: Toggle Breakpoint' })
+    -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
+    vim.keymap.set('n', '<F7>', dapui.toggle, { desc = 'Debug: See last session result.' })
     vim.keymap.set('n', '<F08>', function()
       dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
     end, { desc = 'Debug: Set Breakpoint' })
+    vim.keymap.set('n', '<F09>', dap.toggle_breakpoint, { desc = 'Debug: Toggle Breakpoint' })
+    vim.keymap.set('n', '<F10>', dap.step_over, { desc = 'Debug: Step Over' })
+    vim.keymap.set('n', '<F11>', dap.step_into, { desc = 'Debug: Step Into' })
+    vim.keymap.set('n', '<F12>', dap.step_out, { desc = 'Debug: Step Out' })
 
     -- Dap UI setup
     -- For more information, see |:help nvim-dap-ui|
@@ -77,14 +78,31 @@ return {
       },
     }
 
-    -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-    vim.keymap.set('n', '<F7>', dapui.toggle, { desc = 'Debug: See last session result.' })
-
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
-    -- Install golang specific config
-    require('dap-go').setup()
+    local command_path = vim.fn.stdpath 'data' .. '\\mason\\packages\\netcoredbg\\netcoredbg\\netcoredbg.exe'
+
+    local netcoredbg_adapter = {
+      type = 'executable',
+      command = command_path,
+      args = { '--interpreter=vscode' },
+    }
+
+    dap.adapters.netcoredbg = netcoredbg_adapter
+    dap.adapters.coreclr = netcoredbg_adapter
+
+    --[[     dap.configurations.cs = {
+      {
+        type = 'coreclr',
+        name = 'launch - netcoredbg',
+        request = 'launch',
+        program = function()
+          -- return vim.fn.input("Path to dll: ", vim.fn.getcwd() .. "/src/", "file")
+          return vim.fn.input('Path to dll: ', vim.fn.getcwd() .. '/bin/Debug/net9.0/', 'file')
+        end,
+      },
+    } ]]
   end,
 }

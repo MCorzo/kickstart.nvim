@@ -4,7 +4,6 @@ return {
   version = '*',
   config = function()
     -- Better Around/Inside textobjects
-    --
     -- Examples:
     --  - va)  - [V]isually select [A]round [)]paren
     --  - yinq - [Y]ank [I]nside [N]ext [']quote
@@ -12,7 +11,6 @@ return {
     require('mini.ai').setup { n_lines = 500 }
 
     -- Add/delete/replace surroundings (brackets, quotes, etc.)
-    --
     -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
     -- - sd'   - [S]urround [D]elete [']quotes
     -- - sr)'  - [S]urround [R]eplace [)] [']
@@ -34,7 +32,12 @@ return {
     statusline.section_location = function()
       return '%2l:%-2v'
     end
-    -- ... and there is more!
+
+    statusline.section_filename = function()
+      local file_fullpath = vim.fn.expand '%:f'
+      local file_name, extension = file_fullpath:match '([^/]+)%.([^%.]+)$'
+      return file_name
+    end
     --  Check out: https://github.com/echasnovski/mini.nvim
   end,
 }

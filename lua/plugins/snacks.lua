@@ -98,6 +98,7 @@ return {
             preset = 'vertical',
             preview = 'main',
           },
+          pattern = '',
           title = 'Search in current buffer',
         }
       end,
@@ -115,6 +116,24 @@ return {
       function()
         local os_name = package.config:sub(1, 1) == '\\' and 'win' or 'unix'
         Snacks.terminal(os_name == 'win' and 'pwsh.exe' or 'bash', { win = { border = 'rounded' } })
+
+        --[[  local Snacks = require 'snacks'
+
+        local opciones = { 'Opción A', 'Opción B', 'Opción C' }
+
+        vim.ui.select(opciones, {
+          prompt = 'Selecciona una opción:',
+          format_item = function(item)
+            return '👉 ' .. item
+          end,
+        }, function(seleccion)
+          if seleccion then
+            Snacks.notify.info('Elegiste: ' .. seleccion)
+            -- Aquí puedes ejecutar la acción correspondiente
+          else
+            Snacks.notify.warn 'No se seleccionó ninguna opción'
+          end
+        end) ]]
       end,
       desc = 'Open float [t]erminal',
     },
@@ -143,9 +162,10 @@ return {
     {
       '<leader>sg',
       function()
-        Snacks.picker.git_status()
+        --Snacks.picker.git_status()
+        Snacks.lazygit()
       end,
-      desc = '[G]it Status',
+      desc = 'Lazy[g]it',
     },
     {
       '<leader>sr',
@@ -192,6 +212,63 @@ return {
           },
           title = 'Active Buffers List',
         }
+      end,
+    },
+    {
+      '<F5>',
+      function()
+        print('f5 pressed...' .. vim.fn.getcwd())
+        local os_name = package.config:sub(1, 1) == '\\' and 'win' or 'unix'
+
+        local files = vim.fs.find(function(name, path)
+          return name:match '%.csproj$'
+        end, { limit = math.huge, type = 'file', path = vim.fn.getcwd() })
+        print(vim.fn.getcwd())
+        print(files)
+
+        --[[         local function mostrar_salida_comando(comando)
+          local salida = vim.fn.system(comando)
+
+          -- Crear buffer flotante
+          local buf = vim.api.nvim_create_buf(false, true)
+          vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(salida, '\n'))
+
+          -- Configurar ventana flotante
+          local ancho = math.floor(vim.o.columns * 0.6)
+          local alto = math.floor(vim.o.lines * 0.6)
+          local opts = {
+            relative = 'editor',
+            width = ancho,
+            height = alto,
+            row = (vim.o.lines - alto) / 2,
+            col = (vim.o.columns - ancho) / 2,
+            style = 'minimal',
+            border = 'rounded',
+          }
+
+          vim.api.nvim_open_win(buf, true, opts)
+        end ]]
+
+        -- Ejemplo de uso
+        --mostrar_salida_comando 'ls -la'
+
+        --[[  local Snacks = require 'snacks'
+
+        local opciones = { 'Opción A', 'Opción B', 'Opción C' }
+
+        vim.ui.select(opciones, {
+          prompt = 'Selecciona una opción:',
+          format_item = function(item)
+            return item
+          end,
+        }, function(seleccion)
+          if seleccion then
+            Snacks.notify.info('Elegiste: ' .. seleccion)
+            -- Aquí puedes ejecutar la acción correspondiente
+          else
+            Snacks.notify.warn 'No se seleccionó ninguna opción'
+          end
+        end) ]]
       end,
     },
   },
