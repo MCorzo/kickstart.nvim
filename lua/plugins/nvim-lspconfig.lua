@@ -68,6 +68,7 @@ return {
 
     local servers = {
       roslyn = {},
+      yamlls = {},
       lua_ls = {
         settings = {
           Lua = {
